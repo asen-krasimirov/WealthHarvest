@@ -1,7 +1,4 @@
 # Configure the AWS provider to use the region from the variable
-provider "aws" {
-  region = var.aws_region
-}
 
 # Create VPC
 resource "aws_vpc" "main" {

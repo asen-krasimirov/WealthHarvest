@@ -1,7 +1,4 @@
 # Define the AWS provider
-provider "aws" {
-  region = var.aws_region
-}
 
 # Create the auth ECR repository
 resource "aws_ecr_repository" "auth_repo" {

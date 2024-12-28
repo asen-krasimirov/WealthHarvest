@@ -1,7 +1,4 @@
 # Configure AWS provider with region variable
-provider "aws" {
-  region = var.aws_region
-}
 
 # Fetch VPC and Subnet IDs from vpc.tf
 data "aws_vpc" "main" {

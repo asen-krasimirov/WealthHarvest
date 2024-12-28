@@ -1,4 +1,5 @@
 # variables.tf
+
 variable "aws_region" {
   default = "eu-central-1"
 }
