@@ -8,6 +8,10 @@ variable "aws_iam_user" {
   default = "MDP-USER"
 }
 
+variables "aws_iam_role" {
+  default = "AWSSupportServiceRolePolicy"
+}
+
 variable "app_db_username" {
   description = "The username for the application database."
   default     = "app_user"
