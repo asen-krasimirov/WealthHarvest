@@ -1,3 +1,13 @@
+name: Deploy Backend
+
+on:
+  workflow_call:
+    secrets:
+      AWS_REGION:
+        required: true
+      EKS_CLUSTER_NAME:
+        required: true
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
