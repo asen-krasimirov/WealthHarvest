@@ -8,7 +8,7 @@ variable "aws_iam_user" {
   default = "MDP-USER"
 }
 
-variables "aws_iam_role" {
+variable "aws_iam_role" {
   default = "AWSSupportServiceRolePolicy"
 }
 
