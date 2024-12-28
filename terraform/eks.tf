@@ -43,13 +43,4 @@ resource "aws_autoscaling_group" "eks_worker_group" {
   max_size             = 3
   desired_capacity     = 2
   vpc_zone_identifier  = [aws_subnet.public_subnet.id]
-
-  tags = [
-    {
-      key                 = "Name"
-      value               = "eks-worker-node"
-      propagate_at_launch = true
-    }
-  ]
 }
-
