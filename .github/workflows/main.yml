@@ -8,7 +8,7 @@ on:
       - 'repos/backend/**'
       - 'repos/auth/**'
       - 'repos/frontend/**'
-      - 'repos/terraform/**'
+      - 'terraform/**'
 
 jobs:
   backend:
@@ -98,13 +98,13 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Initialize Terraform
-        working-directory: repos/terraform
+        working-directory: terraform
         run: terraform init
 
       - name: Plan Terraform
-        working-directory: repos/terraform
+        working-directory: terraform
         run: terraform plan
 
       - name: Apply Terraform
-        working-directory: repos/terraform
+        working-directory: terraform
         run: terraform apply -auto-approve
