@@ -2,7 +2,7 @@
 
 # Fetch the existing IAM role by its name
 data "aws_iam_role" "eks_role" {
-  name = var.aws_iam_role  # Replace with the name of your existing IAM role
+  name = var.aws_iam_user  # Replace with the name of your existing IAM role
 }
 
 # EKS Cluster
