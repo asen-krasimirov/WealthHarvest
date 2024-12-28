@@ -50,7 +50,6 @@ resource "aws_db_instance" "app_db_instance" {
   engine               = "postgres"
   engine_version       = "13.4"
   instance_class       = "db.t3.micro"
-  name                 = "app_data"
   username             = var.app_db_username
   password             = var.app_db_password
   publicly_accessible  = false  # Ensure the RDS instance is not publicly accessible
