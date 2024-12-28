@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'repos/backend/**'
-      - 'repos/auth/**'
-      - 'repos/frontend/**'
-      - 'terraform/**'
+    #paths:
+    #  - 'repos/backend/**'
+    #  - 'repos/auth/**'
+    #  - 'repos/frontend/**'
+    #  - 'terraform/**'
 
 jobs:
   backend:
