@@ -73,7 +73,7 @@ resource "aws_security_group" "rds_sg" {
 resource "aws_db_instance" "app_db_instance" {
   allocated_storage    = 20
   engine               = "postgres"
-  engine_version       = "13.7"
+  engine_version       = "11.22"
   instance_class       = "db.t3.micro"
   username             = var.app_db_username
   password             = var.app_db_password
