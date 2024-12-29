@@ -2,7 +2,7 @@
 
 # Use the existing VPC by its ID
 data "aws_vpc" "main" {
-  id = "vpc-073a7a8647eec235c"  # Replace with your existing VPC ID
+  id = var.vpc_id  # Replace with your existing VPC ID
 }
 
 # Create Public Subnet
