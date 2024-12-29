@@ -70,7 +70,7 @@ data "aws_db_instance" "app_db_instance" {
 
 # Create RDS Instance if it doesn't already exist
 resource "aws_db_instance" "app_db_instance" {
-  count = length(data.aws_db_instance.app_db_instance.id) == 0 ? 1 : 0
+  count = length([for instance in data.aws_db_instance.app_db_instance : instance.id]) == 0 ? 1 : 0
   allocated_storage    = 20
   engine               = "postgres"
   engine_version       = "13.4"
