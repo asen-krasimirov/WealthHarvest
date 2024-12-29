@@ -13,7 +13,7 @@ data "aws_internet_gateway" "existing_gw" {
 # Create Public Subnet
 resource "aws_subnet" "public_subnet" {
   vpc_id                  = data.aws_vpc.main1.id  # Reference the existing VPC
-  cidr_block              = "10.0.0.0/24"  # Adjust this as needed
+  cidr_block              = "10.0.14.0/24"  # Adjust this as needed
   availability_zone       = "${var.aws_region}a"
   map_public_ip_on_launch = true  # Public subnet, allows public IPs for instances
 
@@ -25,7 +25,7 @@ resource "aws_subnet" "public_subnet" {
 # Create Private Subnet (for RDS)
 resource "aws_subnet" "private_subnet" {
   vpc_id                  = data.aws_vpc.main1.id  # Reference the existing VPC
-  cidr_block              = "10.0.7.0/24"  # Private subnet CIDR block
+  cidr_block              = "10.0.15.0/24"  # Private subnet CIDR block
   availability_zone       = "${var.aws_region}a"
   map_public_ip_on_launch = false  # Private subnet, no public IPs
 

@@ -1,20 +1,16 @@
 # Fetch existing subnets by their CIDR blocks
-data "aws_subnet" "private_subnet_1" {
-  filter {
-    name   = "cidrBlock"
-    values = ["10.0.4.0/24"]
-  }
-  vpc_id = var.vpc_id
-  availability_zone = "eu-central-1a"
+resource "aws_subnet" "private_subnet_1" {
+  vpc_id                  = var.vpc_id
+  cidr_block              = "10.0.12.0/24"  # Ensure this is unique
+  availability_zone       = "eu-central-1a"
+  map_public_ip_on_launch = false
 }
 
-data "aws_subnet" "private_subnet_2" {
-  filter {
-    name   = "cidrBlock"
-    values = ["10.0.5.0/24"]
-  }
-  vpc_id = var.vpc_id
-  availability_zone = "eu-central-1b"
+resource "aws_subnet" "private_subnet_2" {
+  vpc_id                  = var.vpc_id
+  cidr_block              = "10.0.13.0/24"  # Ensure this is unique
+  availability_zone       = "eu-central-1b"
+  map_public_ip_on_launch = false
 }
 
 # Check if the DB Subnet Group already exists
