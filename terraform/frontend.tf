@@ -9,7 +9,6 @@ resource "aws_s3_bucket" "frontend_bucket" {
 
   # Disable block public access for this bucket
   block_public_acls = false
-  ignore_public_acls = false
 }
 
 resource "aws_s3_bucket_policy" "frontend_policy" {
