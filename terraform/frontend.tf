@@ -1,6 +1,10 @@
 resource "aws_s3_bucket" "frontend_bucket" {
   bucket = "my-frontend-bucket"
 
+  lifecycle {
+    prevent_destroy = true
+  }
+
   website {
     index_document = "index.html"
     error_document = "404.html"
