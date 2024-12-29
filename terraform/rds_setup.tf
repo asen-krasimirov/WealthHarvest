@@ -52,12 +52,7 @@ resource "aws_security_group" "rds_sg" {
   }
 }
 
-# Fetch existing DB Subnet Group (if it exists)
-data "aws_db_subnet_group" "default" {
-  name = "default-subnet-group"
-}
-
-# Create the DB subnet group if it doesn't exist
+# Create DB Subnet Group for RDS
 resource "aws_db_subnet_group" "default" {
   count       = length(data.aws_db_subnet_group.default.id) == 0 ? 1 : 0
   name        = "default-subnet-group"
@@ -71,12 +66,7 @@ resource "aws_db_subnet_group" "default" {
   }
 }
 
-# Fetch existing RDS instance (if it exists)
-data "aws_db_instance" "app_db_instance" {
-  db_instance_identifier = "app-db-instance"
-}
-
-# Create the RDS instance if it doesn't exist
+# Create RDS Instance if it doesn't already exist
 resource "aws_db_instance" "app_db_instance" {
   count = length(data.aws_db_instance.app_db_instance.id) == 0 ? 1 : 0
   allocated_storage    = 20
