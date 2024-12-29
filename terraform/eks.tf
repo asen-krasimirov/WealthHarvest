@@ -78,6 +78,16 @@ resource "aws_eks_cluster" "eks_cluster" {
   }
 }
 
+data "aws_ami" "eks_amazon_linux_2" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-*-x86_64-gp2"]
+  }
+}
+
 # Worker Node Group (optional, if self-managed nodes are used)
 resource "aws_launch_configuration" "eks_workers" {
   name          = "eks-worker-config"
@@ -92,6 +102,9 @@ resource "aws_launch_configuration" "eks_workers" {
                 set -o xtrace
                 /etc/eks/bootstrap.sh my-eks-cluster
                 EOT
+  
+  image_id = data.aws_ami.eks_amazon_linux_2.id
+
   lifecycle {
     create_before_destroy = true
   }
