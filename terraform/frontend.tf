@@ -10,14 +10,14 @@ resource "aws_s3_bucket" "frontend_bucket_wealthharvest" {
 
 # Create the policy for the bucket
 resource "aws_s3_bucket_policy" "frontend_policy" {
-  bucket = aws_s3_bucket.frontend_bucket.id
+  bucket = aws_s3_bucket.frontend_bucket_wealthharvest.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Action    = "s3:GetObject"
         Effect    = "Allow"
-        Resource  = "${aws_s3_bucket.frontend_bucket.arn}/*"
+        Resource  = "${aws_s3_bucket.frontend_bucket_wealthharvest.arn}/*"
         Principal = "*"
       }
     ]
@@ -26,6 +26,6 @@ resource "aws_s3_bucket_policy" "frontend_policy" {
 
 # Set the ACL for the bucket
 resource "aws_s3_bucket_acl" "frontend_acl" {
-  bucket = aws_s3_bucket.frontend_bucket.bucket
+  bucket = aws_s3_bucket.frontend_bucket_wealthharvest.bucket
   acl    = "public-read"
 }
