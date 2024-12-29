@@ -62,10 +62,16 @@ resource "aws_launch_configuration" "eks_workers" {
                 EOT
 }
 
-# IAM instance profile for worker nodes
-resource "aws_iam_instance_profile" "worker_nodes" {
+# Check if the IAM instance profile already exists
+data "aws_iam_instance_profile" "existing_worker_nodes" {
   name = "eks-worker-nodes-profile"
-  role = data.aws_iam_role.eks_role.name
+}
+
+# Create the IAM instance profile if it doesn't exist
+resource "aws_iam_instance_profile" "worker_nodes" {
+  count = length(data.aws_iam_instance_profile.existing_worker_nodes.*.name) == 0 ? 1 : 0
+  name  = "eks-worker-nodes-profile"
+  role  = data.aws_iam_role.eks_role.name
 }
 
 # Autoscaling Group for Worker Nodes
