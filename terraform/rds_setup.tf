@@ -1,5 +1,3 @@
-# Configure AWS provider with region variable
-
 # Fetch existing subnets by their CIDR blocks
 data "aws_subnet" "private_subnet_1" {
   filter {
@@ -28,7 +26,7 @@ data "aws_security_group" "rds_sg" {
 
 # Create the security group if it doesn't exist
 resource "aws_security_group" "rds_sg" {
-  count       = length(data.aws_security_group.rds_sg.id) == 0 ? 1 : 0
+  count       = length(data.aws_security_group.rds_sg.ids) == 0 ? 1 : 0
   name        = "rds-sg"
   description = "Security Group for RDS instance"
   vpc_id      = data.aws_vpc.main1.id
@@ -52,9 +50,8 @@ resource "aws_security_group" "rds_sg" {
   }
 }
 
-# Create DB Subnet Group for RDS
+# Create DB Subnet Group for RDS (no data lookup, directly create it)
 resource "aws_db_subnet_group" "default" {
-  count       = length(data.aws_db_subnet_group.default.id) == 0 ? 1 : 0
   name        = "default-subnet-group"
   subnet_ids  = [
     data.aws_subnet.private_subnet_1.id,
@@ -64,6 +61,11 @@ resource "aws_db_subnet_group" "default" {
   tags = {
     Name = "default-subnet-group"
   }
+}
+
+# Fetch existing DB instance by its identifier
+data "aws_db_instance" "app_db_instance" {
+  db_instance_identifier = "app-db-instance"  # Use the actual instance identifier if available
 }
 
 # Create RDS Instance if it doesn't already exist
@@ -78,8 +80,8 @@ resource "aws_db_instance" "app_db_instance" {
   publicly_accessible  = false  # Ensure the RDS instance is not publicly accessible
   multi_az             = false
   storage_type         = "gp2"
-  db_subnet_group_name = aws_db_subnet_group.default[0].name
-  vpc_security_group_ids = [aws_security_group.rds_sg[0].id]
+  db_subnet_group_name = aws_db_subnet_group.default.name
+  vpc_security_group_ids = [aws_security_group.rds_sg.id]
 
   tags = {
     Name = "app-db-instance"
