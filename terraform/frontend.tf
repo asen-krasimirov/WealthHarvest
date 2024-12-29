@@ -4,7 +4,7 @@ data "aws_s3_bucket" "existing_bucket" {
 }
 
 # Create the S3 bucket if it doesn't already exist
-resource "aws_s3_bucket" "frontendbucketwealthharvest" {
+resource "aws_s3_bucket" "new_bucket" {
   count = length(data.aws_s3_bucket.existing_bucket.id) == 0 ? 1 : 0
 
   bucket = "frontendbucketwealthharvest"
@@ -19,14 +19,14 @@ resource "aws_s3_bucket" "frontendbucketwealthharvest" {
 resource "aws_s3_bucket_policy" "frontend_policy" {
   count = length(data.aws_s3_bucket.existing_bucket.id) == 0 ? 1 : 0
 
-  bucket = aws_s3_bucket.frontendbucketwealthharvest[count.index].id
+  bucket = aws_s3_bucket.new_bucket[count.index].id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Action    = "s3:GetObject"
         Effect    = "Allow"
-        Resource  = "${aws_s3_bucket.frontendbucketwealthharvest[count.index].arn}/*"
+        Resource  = "${aws_s3_bucket.new_bucket[count.index].arn}/*"
         Principal = "*"
       }
     ]
@@ -37,6 +37,6 @@ resource "aws_s3_bucket_policy" "frontend_policy" {
 resource "aws_s3_bucket_acl" "frontend_acl" {
   count = length(data.aws_s3_bucket.existing_bucket.id) == 0 ? 1 : 0
 
-  bucket = aws_s3_bucket.frontendbucketwealthharvest[count.index].bucket
+  bucket = aws_s3_bucket.new_bucket[count.index].bucket
   acl    = "public-read"
 }
