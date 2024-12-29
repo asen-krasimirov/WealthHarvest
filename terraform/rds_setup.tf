@@ -1,19 +1,19 @@
 # Check if the DB Subnet Group already exists
 data "aws_db_subnet_group" "existing" {
-  name = "default-subnet-group"
+  name = "db-subnet-group"
 }
 
 # Create DB Subnet Group for RDS only if it doesn't exist
 resource "aws_db_subnet_group" "default" {
   count        = length(data.aws_db_subnet_group.existing.id) == 0 ? 1 : 0
-  name         = "default-subnet-group"
+  name         = "db-subnet-group"
   subnet_ids   = [
     data.aws_subnet.private_subnet_1.id,
     data.aws_subnet.private_subnet_2.id
   ]
 
   tags = {
-    Name = "default-subnet-group"
+    Name = "db-subnet-group"
   }
 }
 
@@ -23,7 +23,7 @@ data "aws_subnet" "private_subnet_1" {
     name   = "cidrBlock"
     values = ["10.0.4.0/24"]
   }
-  vpc_id = data.aws_vpc.main1.id
+  vpc_id = var.vpc_id
 }
 
 data "aws_subnet" "private_subnet_2" {
@@ -31,7 +31,7 @@ data "aws_subnet" "private_subnet_2" {
     name   = "cidrBlock"
     values = ["10.0.5.0/24"]
   }
-  vpc_id = data.aws_vpc.main1.id
+  vpc_id = var.vpc_id
 }
 
 # Fetch existing security group for RDS instance (if it exists)
@@ -40,7 +40,7 @@ data "aws_security_group" "rds_sg" {
     name   = "tag:Name"
     values = ["rds-sg"]
   }
-  vpc_id = data.aws_vpc.main1.id
+  vpc_id = var.vpc_id
 }
 
 # Create the security group if it doesn't exist
@@ -48,7 +48,7 @@ resource "aws_security_group" "rds_sg" {
   count       = length(data.aws_security_group.rds_sg.id) == 0 ? 1 : 0
   name        = "rds-sg"
   description = "Security Group for RDS instance"
-  vpc_id      = data.aws_vpc.main1.id
+  vpc_id      = var.vpc_id
 
   ingress {
     from_port   = 5432  # PostgreSQL port (adjust for your DB)
@@ -73,7 +73,7 @@ resource "aws_security_group" "rds_sg" {
 resource "aws_db_instance" "app_db_instance" {
   allocated_storage    = 20
   engine               = "postgres"
-  engine_version       = "14.6"
+  engine_version       = "13.7"
   instance_class       = "db.t3.micro"
   username             = var.app_db_username
   password             = var.app_db_password
