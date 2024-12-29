@@ -1,12 +1,5 @@
-# Try to find the existing bucket (if it exists)
-data "aws_s3_bucket" "existing_bucket" {
-  bucket = "my-frontend-bucket"
-}
-
-# Create the S3 bucket if it doesn't already exist
+# Create the S3 bucket
 resource "aws_s3_bucket" "frontend_bucket" {
-  count = length(data.aws_s3_bucket.existing_bucket.id) == 0 ? 1 : 0
-
   bucket = "my-frontend-bucket"
 
   website {
@@ -17,28 +10,24 @@ resource "aws_s3_bucket" "frontend_bucket" {
   acl = "public-read"  # Allow public read access
 }
 
-# Create the policy only if the bucket is newly created
+# Create the policy for the bucket
 resource "aws_s3_bucket_policy" "frontend_policy" {
-  count = length(data.aws_s3_bucket.existing_bucket.id) == 0 ? 1 : 0
-
-  bucket = aws_s3_bucket.frontend_bucket[count.index].id
+  bucket = aws_s3_bucket.frontend_bucket.id
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Action    = "s3:GetObject"
         Effect    = "Allow"
-        Resource  = "${aws_s3_bucket.frontend_bucket[count.index].arn}/*"
+        Resource  = "${aws_s3_bucket.frontend_bucket.arn}/*"
         Principal = "*"
       }
     ]
   })
 }
 
-# Set the ACL only if the bucket is newly created
+# Set the ACL for the bucket
 resource "aws_s3_bucket_acl" "frontend_acl" {
-  count = length(data.aws_s3_bucket.existing_bucket.id) == 0 ? 1 : 0
-
-  bucket = aws_s3_bucket.frontend_bucket[count.index].bucket
+  bucket = aws_s3_bucket.frontend_bucket.bucket
   acl    = "public-read"
 }
