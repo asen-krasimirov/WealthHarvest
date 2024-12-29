@@ -1,10 +1,5 @@
 # Configure AWS provider with region variable
 
-# Fetch existing VPC by ID
-data "aws_vpc" "main1" {
-  id = "vpc-073a7a8647eec235c"  # Reference the existing VPC directly by its ID
-}
-
 # Fetch existing subnets by their CIDR blocks
 data "aws_subnet" "private_subnet_1" {
   filter {
