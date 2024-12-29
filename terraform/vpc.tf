@@ -33,9 +33,3 @@ resource "aws_subnet" "private_subnet" {
     Name = "private-subnet"
   }
 }
-
-# Attach the existing Internet Gateway to the VPC
-resource "aws_vpc_gateway_attachment" "gw_attachment" {
-  vpc_id             = data.aws_vpc.main1.id  # Reference the existing VPC
-  internet_gateway_id = data.aws_internet_gateway.existing_gw.id  # Use the existing Internet Gateway
-}
