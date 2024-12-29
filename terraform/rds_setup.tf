@@ -2,12 +2,12 @@
 
 # Fetch VPC from vpc.tf
 data "aws_vpc" "main" {
-  id = aws_vpc.main1.id
+  id = data.aws_vpc.main1.id
 }
 
 # Define two subnets in different Availability Zones for RDS
 resource "aws_subnet" "private_subnet_1" {
-  vpc_id                  = aws_vpc.main1.id
+  vpc_id                  = data.aws_vpc.main1.id
   cidr_block              = "10.0.4.0/24"
   availability_zone       = "eu-central-1a"
   map_public_ip_on_launch = false
@@ -18,7 +18,7 @@ resource "aws_subnet" "private_subnet_1" {
 }
 
 resource "aws_subnet" "private_subnet_2" {
-  vpc_id                  = aws_vpc.main1.id
+  vpc_id                  = data.aws_vpc.main1.id
   cidr_block              = "10.0.5.0/24"
   availability_zone       = "eu-central-1b"
   map_public_ip_on_launch = false
@@ -32,7 +32,7 @@ resource "aws_subnet" "private_subnet_2" {
 resource "aws_security_group" "rds_sg" {
   name        = "rds-sg"
   description = "Security Group for RDS instance"
-  vpc_id      = aws_vpc.main1.id
+  vpc_id      = data.aws_vpc.main1.id
 
   ingress {
     from_port   = 5432  # PostgreSQL port (adjust for your DB)
