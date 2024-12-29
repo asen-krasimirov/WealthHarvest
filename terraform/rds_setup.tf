@@ -5,6 +5,7 @@ data "aws_subnet" "private_subnet_1" {
     values = ["10.0.4.0/24"]
   }
   vpc_id = var.vpc_id
+  availability_zone = "eu-central-1a"
 }
 
 data "aws_subnet" "private_subnet_2" {
@@ -13,6 +14,7 @@ data "aws_subnet" "private_subnet_2" {
     values = ["10.0.5.0/24"]
   }
   vpc_id = var.vpc_id
+  availability_zone = "eu-central-1b"
 }
 
 # Check if the DB Subnet Group already exists
