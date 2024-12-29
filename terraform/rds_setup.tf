@@ -24,9 +24,9 @@ data "aws_subnet" "private_subnet_3" {
 }
 
 # Check if the DB Subnet Group already exists
-#data "aws_db_subnet_group" "existing" {
-#  name = "default-subnet-group1"
-#}
+data "aws_db_subnet_group" "existing" {
+  name = "default-subnet-group1"
+}
 
 # Create DB Subnet Group for RDS if it does not exist
 resource "aws_db_subnet_group" "default" {
