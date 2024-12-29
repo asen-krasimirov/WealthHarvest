@@ -6,8 +6,6 @@ resource "aws_s3_bucket" "frontend_bucket" {
     index_document = "index.html"
     error_document = "404.html"
   }
-
-  acl = "public-read"  # Allow public read access
 }
 
 # Create the policy for the bucket
