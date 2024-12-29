@@ -68,8 +68,8 @@ resource "aws_eks_cluster" "eks_cluster" {
 
   vpc_config {
     subnet_ids = [
-      coalesce(data.aws_subnet.existing_public_subnet_1.id, aws_subnet.public_subnet_1[0].id),
-      coalesce(data.aws_subnet.existing_public_subnet_2.id, aws_subnet.public_subnet_2[0].id)
+      length(data.aws_subnet.existing_public_subnet_1.id) > 0 ? data.aws_subnet.existing_public_subnet_1.id : aws_subnet.public_subnet_1[0].id,
+      length(data.aws_subnet.existing_public_subnet_2.id) > 0 ? data.aws_subnet.existing_public_subnet_2.id : aws_subnet.public_subnet_2[0].id
     ]
   }
 
@@ -94,7 +94,7 @@ resource "aws_launch_configuration" "eks_workers" {
   instance_type = "t3.medium"
 
   # Ensure IAM instance profile reference is properly resolved
-  iam_instance_profile = length(data.aws_iam_instance_profile.existing_worker_nodes.id) > 0 ? data.aws_iam_instance_profile.existing_worker_nodes.id : aws_iam_instance_profile.worker_nodes[0].id
+  iam_instance_profile = length(data.aws_iam_instance_profile.existing_worker_nodes.id) > 0 ? data.aws_iam_instance_profile.existing_worker_nodes.name : aws_iam_instance_profile.worker_nodes[0].name
 
   # Specify the EKS cluster name explicitly
   user_data = <<-EOT
@@ -129,8 +129,8 @@ resource "aws_autoscaling_group" "eks_worker_group" {
   max_size             = 3
   desired_capacity     = 2
   vpc_zone_identifier  = [
-    coalesce(data.aws_subnet.existing_public_subnet_1.id, aws_subnet.public_subnet_1[0].id),
-    coalesce(data.aws_subnet.existing_public_subnet_2.id, aws_subnet.public_subnet_2[0].id)
+    length(data.aws_subnet.existing_public_subnet_1.id) > 0 ? data.aws_subnet.existing_public_subnet_1.id : aws_subnet.public_subnet_1[0].id,
+    length(data.aws_subnet.existing_public_subnet_2.id) > 0 ? data.aws_subnet.existing_public_subnet_2.id : aws_subnet.public_subnet_2[0].id
   ]
   depends_on = [aws_launch_configuration.eks_workers]
 }
