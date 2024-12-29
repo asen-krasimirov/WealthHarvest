@@ -90,7 +90,7 @@ resource "aws_db_instance" "app_db_instance" {
   multi_az             = false
   storage_type         = "gp3"
   #db_subnet_group_name = length(data.aws_db_subnet_group.existing.id) > 0 ? data.aws_db_subnet_group.existing.name : aws_db_subnet_group.default[0].name
-  db_subnet_group_name = aws_db_subnet_group.default[0].name
+  db_subnet_group_name = aws_db_subnet_group.default.name
   vpc_security_group_ids = aws_security_group.rds_sg.*.id
 
   tags = {
