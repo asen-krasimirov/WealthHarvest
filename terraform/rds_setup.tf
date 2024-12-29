@@ -63,14 +63,8 @@ resource "aws_db_subnet_group" "default" {
   }
 }
 
-# Fetch existing DB instance by its identifier
-data "aws_db_instance" "app_db_instance" {
-  db_instance_identifier = "app-db-instance"  # Use the actual instance identifier if available
-}
-
-# Create RDS Instance if it doesn't already exist
+# Create RDS Instance unconditionally
 resource "aws_db_instance" "app_db_instance" {
-  count = length([for instance in data.aws_db_instance.app_db_instance : instance.id]) == 0 ? 1 : 0
   allocated_storage    = 20
   engine               = "postgres"
   engine_version       = "13.4"
@@ -90,9 +84,9 @@ resource "aws_db_instance" "app_db_instance" {
 
 # Outputs (Optional, to view the RDS endpoint and other details)
 output "rds_endpoint" {
-  value = aws_db_instance.app_db_instance[0].endpoint
+  value = aws_db_instance.app_db_instance.endpoint
 }
 
 output "rds_port" {
-  value = aws_db_instance.app_db_instance[0].port
+  value = aws_db_instance.app_db_instance.port
 }
