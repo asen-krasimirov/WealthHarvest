@@ -9,7 +9,7 @@ variable "aws_iam_user" {
 }
 
 variable "aws_iam_role" {
-  default = "AWSServiceRoleForSupport"
+  default = "AWSServiceRoleForAmazonEKS"
 }
 
 variable "app_db_username" {
