@@ -1,7 +1,6 @@
 # Try to find the existing bucket (if it exists)
 data "aws_s3_bucket" "existing_bucket" {
   bucket = "my-frontend-bucket"
-  region = var.aws_region  # Specify the correct region where your bucket is located
 }
 
 # Create the S3 bucket if it doesn't already exist
