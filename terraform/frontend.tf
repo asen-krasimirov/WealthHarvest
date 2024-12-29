@@ -1,6 +1,5 @@
 resource "aws_s3_bucket" "frontend_bucket" {
   bucket = "my-frontend-bucket"
-  acl    = "public-read"  # Allow public read access
 
   website {
     index_document = "index.html"
@@ -23,10 +22,7 @@ resource "aws_s3_bucket_policy" "frontend_policy" {
   })
 }
 
-# Remove the block public ACL settings to allow public access
-resource "aws_s3_bucket_public_access_block" "frontend_bucket_access_block" {
-  bucket = aws_s3_bucket.frontend_bucket.id
-
-  block_public_acls = false  # Allow public ACLs
-  ignore_public_acls = false  # Allow public ACLs
+resource "aws_s3_bucket_acl" "frontend_acl" {
+  bucket = aws_s3_bucket.frontend_bucket.bucket
+  acl    = "public-read"
 }
