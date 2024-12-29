@@ -89,12 +89,14 @@ data "aws_ami" "eks_amazon_linux_2" {
 }
 
 # Worker Node Group (optional, if self-managed nodes are used)
-resource "aws_launch_configuration" "eks_workers" {
-  name          = "eks-worker-config"
+resource "aws_launch_template" "eks_workers" {
+  name_prefix   = "eks-worker-config"
   instance_type = "t3.medium"
 
   # Ensure IAM instance profile reference is properly resolved
-  iam_instance_profile = length(data.aws_iam_instance_profile.existing_worker_nodes.id) > 0 ? data.aws_iam_instance_profile.existing_worker_nodes.name : aws_iam_instance_profile.worker_nodes[0].name
+  iam_instance_profile {
+    name = length(data.aws_iam_instance_profile.existing_worker_nodes.id) > 0 ? data.aws_iam_instance_profile.existing_worker_nodes.name : aws_iam_instance_profile.worker_nodes[0].name
+  }
 
   # Specify the EKS cluster name explicitly
   user_data = <<-EOT
@@ -122,9 +124,12 @@ resource "aws_iam_instance_profile" "worker_nodes" {
   role  = data.aws_iam_role.eks_role.name
 }
 
-# Autoscaling Group for Worker Nodes
+# Update the Autoscaling Group to use the launch template
 resource "aws_autoscaling_group" "eks_worker_group" {
-  launch_configuration = aws_launch_configuration.eks_workers.id
+  launch_template {
+    id      = aws_launch_template.eks_workers.id
+    version = "$Latest"
+  }
   min_size             = 1
   max_size             = 3
   desired_capacity     = 2
@@ -132,5 +137,5 @@ resource "aws_autoscaling_group" "eks_worker_group" {
     length(data.aws_subnet.existing_public_subnet_1.id) > 0 ? data.aws_subnet.existing_public_subnet_1.id : aws_subnet.public_subnet_1[0].id,
     length(data.aws_subnet.existing_public_subnet_2.id) > 0 ? data.aws_subnet.existing_public_subnet_2.id : aws_subnet.public_subnet_2[0].id
   ]
-  depends_on = [aws_launch_configuration.eks_workers]
+  depends_on = [aws_launch_template.eks_workers]
 }
