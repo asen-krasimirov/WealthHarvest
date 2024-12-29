@@ -1,12 +1,31 @@
 # Configure AWS provider with region variable
 
-# Fetch VPC and Subnet IDs from vpc.tf
+# Fetch VPC from vpc.tf
 data "aws_vpc" "main" {
   id = aws_vpc.main.id
 }
 
-data "aws_subnet" "private_subnet" {
-  id = aws_subnet.private_subnet.id
+# Define two subnets in different Availability Zones for RDS
+resource "aws_subnet" "private_subnet_1" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "eu-central-1a"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "private-subnet-1"
+  }
+}
+
+resource "aws_subnet" "private_subnet_2" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "eu-central-1b"
+  map_public_ip_on_launch = false
+
+  tags = {
+    Name = "private-subnet-2"
+  }
 }
 
 # Security Group for RDS instance (restricted to your VPC)
@@ -37,7 +56,10 @@ resource "aws_security_group" "rds_sg" {
 # DB Subnet Group for RDS
 resource "aws_db_subnet_group" "default" {
   name       = "default-subnet-group"
-  subnet_ids = [aws_subnet.private_subnet.id]  # Only private subnet for RDS
+  subnet_ids = [
+    aws_subnet.private_subnet_1.id,
+    aws_subnet.private_subnet_2.id
+  ]  # Include both private subnets for AZ coverage
 
   tags = {
     Name = "default-subnet-group"
