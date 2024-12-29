@@ -24,9 +24,9 @@ data "aws_subnet" "private_subnet_3" {
 }
 
 # Check if the DB Subnet Group already exists
-data "aws_db_subnet_group" "existing" {
-  name = "default-subnet-group1"
-}
+#data "aws_db_subnet_group" "existing" {
+#  name = "default-subnet-group1"
+#}
 
 # Create DB Subnet Group for RDS if it does not exist
 resource "aws_db_subnet_group" "default" {
@@ -89,7 +89,8 @@ resource "aws_db_instance" "app_db_instance" {
   publicly_accessible  = false  # Ensure the RDS instance is not publicly accessible
   multi_az             = false
   storage_type         = "gp3"
-  db_subnet_group_name = length(data.aws_db_subnet_group.existing.id) > 0 ? data.aws_db_subnet_group.existing.name : aws_db_subnet_group.default[0].name
+  #db_subnet_group_name = length(data.aws_db_subnet_group.existing.id) > 0 ? data.aws_db_subnet_group.existing.name : aws_db_subnet_group.default[0].name
+  db_subnet_group_name = aws_db_subnet_group.default[0].name
   vpc_security_group_ids = aws_security_group.rds_sg.*.id
 
   tags = {
