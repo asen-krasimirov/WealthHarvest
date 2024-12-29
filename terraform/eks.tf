@@ -94,7 +94,7 @@ resource "aws_launch_configuration" "eks_workers" {
   instance_type = "t3.medium"
 
   # Ensure IAM instance profile reference is properly resolved
-  iam_instance_profile = aws_iam_instance_profile.worker_nodes[0].name
+  iam_instance_profile = length(data.aws_iam_instance_profile.existing_worker_nodes.id) > 0 ? data.aws_iam_instance_profile.existing_worker_nodes.id : aws_iam_instance_profile.worker_nodes[0].id
 
   # Specify the EKS cluster name explicitly
   user_data = <<-EOT
