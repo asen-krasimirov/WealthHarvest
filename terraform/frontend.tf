@@ -8,10 +8,20 @@ resource "aws_s3_bucket" "new_bucket" {
   count = length(data.aws_s3_bucket.existing_bucket.id) == 0 ? 1 : 0
 
   bucket = "frontendbucketwealthharvest"
+}
 
-  website {
-    index_document = "index.html"
-    error_document = "404.html"
+# Configure the website for the S3 bucket if it is newly created
+resource "aws_s3_bucket_website_configuration" "website_config" {
+  count = length(data.aws_s3_bucket.existing_bucket.id) == 0 ? 1 : 0
+
+  bucket = aws_s3_bucket.new_bucket[count.index].bucket
+
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "404.html"
   }
 }
 
