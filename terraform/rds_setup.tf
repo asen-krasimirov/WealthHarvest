@@ -26,7 +26,7 @@ data "aws_security_group" "rds_sg" {
 
 # Create the security group if it doesn't exist
 resource "aws_security_group" "rds_sg" {
-  count       = length(data.aws_security_group.rds_sg.ids) == 0 ? 1 : 0
+  count       = length(data.aws_security_group.rds_sg.id) == 0 ? 1 : 0
   name        = "rds-sg"
   description = "Security Group for RDS instance"
   vpc_id      = data.aws_vpc.main1.id
