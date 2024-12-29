@@ -1,35 +1,39 @@
 # Configure AWS provider with region variable
 
-# Fetch VPC from vpc.tf
-data "aws_vpc" "main" {
-  id = data.aws_vpc.main1.id
+# Fetch existing VPC by ID
+data "aws_vpc" "main1" {
+  id = "vpc-073a7a8647eec235c"  # Reference the existing VPC directly by its ID
 }
 
-# Define two subnets in different Availability Zones for RDS
-resource "aws_subnet" "private_subnet_1" {
-  vpc_id                  = data.aws_vpc.main1.id
-  cidr_block              = "10.0.4.0/24"
-  availability_zone       = "eu-central-1a"
-  map_public_ip_on_launch = false
-
-  tags = {
-    Name = "private-subnet-1"
+# Fetch existing subnets by their CIDR blocks
+data "aws_subnet" "private_subnet_1" {
+  filter {
+    name   = "cidrBlock"
+    values = ["10.0.4.0/24"]
   }
+  vpc_id = data.aws_vpc.main1.id
 }
 
-resource "aws_subnet" "private_subnet_2" {
-  vpc_id                  = data.aws_vpc.main1.id
-  cidr_block              = "10.0.5.0/24"
-  availability_zone       = "eu-central-1b"
-  map_public_ip_on_launch = false
-
-  tags = {
-    Name = "private-subnet-2"
+data "aws_subnet" "private_subnet_2" {
+  filter {
+    name   = "cidrBlock"
+    values = ["10.0.5.0/24"]
   }
+  vpc_id = data.aws_vpc.main1.id
 }
 
-# Security Group for RDS instance (restricted to your VPC)
+# Fetch existing security group for RDS instance (if it exists)
+data "aws_security_group" "rds_sg" {
+  filter {
+    name   = "tag:Name"
+    values = ["rds-sg"]
+  }
+  vpc_id = data.aws_vpc.main1.id
+}
+
+# If the security group doesn't exist, create it
 resource "aws_security_group" "rds_sg" {
+  count       = length(data.aws_security_group.rds_sg.ids) == 0 ? 1 : 0
   name        = "rds-sg"
   description = "Security Group for RDS instance"
   vpc_id      = data.aws_vpc.main1.id
@@ -53,21 +57,33 @@ resource "aws_security_group" "rds_sg" {
   }
 }
 
-# DB Subnet Group for RDS
+# Fetch existing DB Subnet Group (if it exists)
+data "aws_db_subnet_group" "default" {
+  name = "default-subnet-group"
+}
+
+# If the DB subnet group doesn't exist, create it
 resource "aws_db_subnet_group" "default" {
-  name       = "default-subnet-group"
-  subnet_ids = [
-    aws_subnet.private_subnet_1.id,
-    aws_subnet.private_subnet_2.id
-  ]  # Include both private subnets for AZ coverage
+  count       = length(data.aws_db_subnet_group.default.ids) == 0 ? 1 : 0
+  name        = "default-subnet-group"
+  subnet_ids  = [
+    data.aws_subnet.private_subnet_1.id,
+    data.aws_subnet.private_subnet_2.id
+  ]
 
   tags = {
     Name = "default-subnet-group"
   }
 }
 
-# RDS Instance Configuration
+# Fetch existing RDS instance (if it exists)
+data "aws_db_instance" "app_db_instance" {
+  db_instance_identifier = "app-db-instance"
+}
+
+# If the RDS instance doesn't exist, create it
 resource "aws_db_instance" "app_db_instance" {
+  count = length(data.aws_db_instance.app_db_instance.ids) == 0 ? 1 : 0
   allocated_storage    = 20
   engine               = "postgres"
   engine_version       = "13.4"
@@ -87,9 +103,9 @@ resource "aws_db_instance" "app_db_instance" {
 
 # Outputs (Optional, to view the RDS endpoint and other details)
 output "rds_endpoint" {
-  value = aws_db_instance.app_db_instance.endpoint
+  value = aws_db_instance.app_db_instance[0].endpoint
 }
 
 output "rds_port" {
-  value = aws_db_instance.app_db_instance.port
+  value = aws_db_instance.app_db_instance[0].port
 }

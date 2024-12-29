@@ -20,7 +20,7 @@ resource "aws_subnet" "public_subnet" {
 # Create Private Subnet (for RDS)
 resource "aws_subnet" "private_subnet" {
   vpc_id                  = data.aws_vpc.main1.id  # Reference the existing VPC
-  cidr_block              = "10.0.1.0/24"  # Private subnet CIDR block
+  cidr_block              = "10.0.7.0/24"  # Private subnet CIDR block
   availability_zone       = "${var.aws_region}a"
   map_public_ip_on_launch = false  # Private subnet, no public IPs
 
