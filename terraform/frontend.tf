@@ -1,5 +1,5 @@
 # Create the S3 bucket
-resource "aws_s3_bucket" "frontend_bucket" {
+resource "aws_s3_bucket" "frontend_bucket_wealthharvest" {
   bucket = "my-frontend-bucket"
 
   website {
