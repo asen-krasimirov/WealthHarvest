@@ -3,6 +3,11 @@ data "aws_iam_role" "eks_role" {
   name = var.aws_iam_role
 }
 
+# Check for existing EKS Cluster
+data "aws_eks_cluster" "existing_cluster" {
+  name = "my-eks-cluster"
+}
+
 # Check for existing Public Subnet 1
 data "aws_subnet" "existing_public_subnet_1" {
   filter {
@@ -55,15 +60,16 @@ resource "aws_subnet" "public_subnet_2" {
   }
 }
 
-# EKS Cluster
+# EKS Cluster (create only if it doesn't already exist)
 resource "aws_eks_cluster" "eks_cluster" {
+  count    = length(data.aws_eks_cluster.existing_cluster.id) == 0 ? 1 : 0
   name     = "my-eks-cluster"
   role_arn = data.aws_iam_role.eks_role.arn
 
   vpc_config {
     subnet_ids = [
-      length(data.aws_subnet.existing_public_subnet_1.id) > 0 ? data.aws_subnet.existing_public_subnet_1.id : aws_subnet.public_subnet_1[0].id,
-      length(data.aws_subnet.existing_public_subnet_2.id) > 0 ? data.aws_subnet.existing_public_subnet_2.id : aws_subnet.public_subnet_2[0].id
+      coalesce(data.aws_subnet.existing_public_subnet_1.id, aws_subnet.public_subnet_1[0].id),
+      coalesce(data.aws_subnet.existing_public_subnet_2.id, aws_subnet.public_subnet_2[0].id)
     ]
   }
 
@@ -77,16 +83,18 @@ resource "aws_launch_configuration" "eks_workers" {
   name          = "eks-worker-config"
   instance_type = "t3.medium"
 
-  # Attach the existing IAM role to the worker nodes
-  iam_instance_profile = length(data.aws_iam_instance_profile.existing_worker_nodes.*.name) == 0 ? aws_iam_instance_profile.worker_nodes[0].name : data.aws_iam_instance_profile.existing_worker_nodes.name
+  # Ensure IAM instance profile reference is properly resolved
+  iam_instance_profile = aws_iam_instance_profile.worker_nodes[0].name
 
-  image_id = "ami-0c24db5b5f274e9a0"  # Example Amazon Linux AMI for EKS worker nodes
-
+  # Specify the EKS cluster name explicitly
   user_data = <<-EOT
                 #!/bin/bash
                 set -o xtrace
-                /etc/eks/bootstrap.sh ${aws_eks_cluster.eks_cluster.name}
+                /etc/eks/bootstrap.sh my-eks-cluster
                 EOT
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # Check if the IAM instance profile already exists
@@ -96,7 +104,7 @@ data "aws_iam_instance_profile" "existing_worker_nodes" {
 
 # Create the IAM instance profile if it doesn't exist
 resource "aws_iam_instance_profile" "worker_nodes" {
-  count = length(data.aws_iam_instance_profile.existing_worker_nodes.*.name) == 0 ? 1 : 0
+  count = length(data.aws_iam_instance_profile.existing_worker_nodes.id) == 0 ? 1 : 0
   name  = "eks-worker-nodes-profile"
   role  = data.aws_iam_role.eks_role.name
 }
@@ -108,7 +116,8 @@ resource "aws_autoscaling_group" "eks_worker_group" {
   max_size             = 3
   desired_capacity     = 2
   vpc_zone_identifier  = [
-    length(data.aws_subnet.existing_public_subnet_1.id) > 0 ? data.aws_subnet.existing_public_subnet_1.id : aws_subnet.public_subnet_1[0].id,
-    length(data.aws_subnet.existing_public_subnet_2.id) > 0 ? data.aws_subnet.existing_public_subnet_2.id : aws_subnet.public_subnet_2[0].id
+    coalesce(data.aws_subnet.existing_public_subnet_1.id, aws_subnet.public_subnet_1[0].id),
+    coalesce(data.aws_subnet.existing_public_subnet_2.id, aws_subnet.public_subnet_2[0].id)
   ]
+  depends_on = [aws_launch_configuration.eks_workers]
 }
