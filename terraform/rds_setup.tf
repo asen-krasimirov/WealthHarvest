@@ -1,20 +1,24 @@
-# Fetch existing subnets by their CIDR blocks
-
 # Declare data resources for existing private subnets
 data "aws_subnet" "private_subnet_1" {
   filter {
-    name   = "cidrBlock"
+    name   = "cidr-block"
     values = ["10.0.12.0/24"]  # Updated CIDR block
   }
-  vpc_id = var.vpc_id
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
 }
 
 data "aws_subnet" "private_subnet_2" {
   filter {
-    name   = "cidrBlock"
+    name   = "cidr-block"
     values = ["10.0.13.0/24"]  # Updated CIDR block
   }
-  vpc_id = var.vpc_id
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
 }
 
 # Check if the DB Subnet Group already exists
@@ -24,7 +28,7 @@ data "aws_db_subnet_group" "existing" {
 
 # Create DB Subnet Group for RDS if it does not exist
 resource "aws_db_subnet_group" "default" {
-  count        = length(data.aws_db_subnet_group.existing.id) == 0 ? 1 : 0
+  count        = length(data.aws_db_subnet_group.existing) == 0 ? 1 : 0
   name         = "default-subnet-group"
   subnet_ids   = [
     data.aws_subnet.private_subnet_1.id,
@@ -47,7 +51,7 @@ data "aws_security_group" "rds_sg" {
 
 # Create the security group if it doesn't exist
 resource "aws_security_group" "rds_sg" {
-  count       = length(data.aws_security_group.rds_sg.id) == 0 ? 1 : 0
+  count       = length(data.aws_security_group.rds_sg) == 0 ? 1 : 0
   name        = "rds-sg"
   description = "Security Group for RDS instance"
   vpc_id      = var.vpc_id
@@ -82,7 +86,7 @@ resource "aws_db_instance" "app_db_instance" {
   publicly_accessible  = false  # Ensure the RDS instance is not publicly accessible
   multi_az             = false
   storage_type         = "gp2"
-  db_subnet_group_name = length(data.aws_db_subnet_group.existing.id) > 0 ? data.aws_db_subnet_group.existing.name : aws_db_subnet_group.default[0].name
+  db_subnet_group_name = length(data.aws_db_subnet_group.existing) > 0 ? data.aws_db_subnet_group.existing.name : aws_db_subnet_group.default[0].name
   vpc_security_group_ids = aws_security_group.rds_sg.*.id
 
   tags = {
