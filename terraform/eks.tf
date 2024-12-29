@@ -1,29 +1,56 @@
-# eks.tf
-
 # Fetch the existing IAM role by its name
 data "aws_iam_role" "eks_role" {
   name = var.aws_iam_role
 }
 
-# Define subnets (ensure they span at least two AZs)
+# Check for existing Public Subnet 1
+data "aws_subnet" "existing_public_subnet_1" {
+  filter {
+    name   = "cidr-block"
+    values = ["10.0.10.0/24"]
+  }
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
+}
+
+# Check for existing Public Subnet 2
+data "aws_subnet" "existing_public_subnet_2" {
+  filter {
+    name   = "cidr-block"
+    values = ["10.0.11.0/24"]
+  }
+  filter {
+    name   = "vpc-id"
+    values = [var.vpc_id]
+  }
+}
+
+# Create Public Subnet 1 only if it doesn't already exist
 resource "aws_subnet" "public_subnet_1" {
+  count                   = length(data.aws_subnet.existing_public_subnet_1.id) == 0 ? 1 : 0
   vpc_id                  = var.vpc_id
   cidr_block              = "10.0.10.0/24"
   availability_zone       = "eu-central-1a"
   map_public_ip_on_launch = true
+
   tags = {
-    Name = "public-subnet-1"
+    Name                  = "public-subnet-1"
     "kubernetes.io/role/elb" = "1"
   }
 }
 
+# Create Public Subnet 2 only if it doesn't already exist
 resource "aws_subnet" "public_subnet_2" {
+  count                   = length(data.aws_subnet.existing_public_subnet_2.id) == 0 ? 1 : 0
   vpc_id                  = var.vpc_id
   cidr_block              = "10.0.11.0/24"
   availability_zone       = "eu-central-1b"
   map_public_ip_on_launch = true
+
   tags = {
-    Name = "public-subnet-2"
+    Name                  = "public-subnet-2"
     "kubernetes.io/role/elb" = "1"
   }
 }
@@ -35,8 +62,8 @@ resource "aws_eks_cluster" "eks_cluster" {
 
   vpc_config {
     subnet_ids = [
-      aws_subnet.public_subnet_1.id,
-      aws_subnet.public_subnet_2.id
+      length(data.aws_subnet.existing_public_subnet_1.id) > 0 ? data.aws_subnet.existing_public_subnet_1.id : aws_subnet.public_subnet_1[0].id,
+      length(data.aws_subnet.existing_public_subnet_2.id) > 0 ? data.aws_subnet.existing_public_subnet_2.id : aws_subnet.public_subnet_2[0].id
     ]
   }
 
@@ -81,7 +108,7 @@ resource "aws_autoscaling_group" "eks_worker_group" {
   max_size             = 3
   desired_capacity     = 2
   vpc_zone_identifier  = [
-    aws_subnet.public_subnet_1.id,
-    aws_subnet.public_subnet_2.id
+    length(data.aws_subnet.existing_public_subnet_1.id) > 0 ? data.aws_subnet.existing_public_subnet_1.id : aws_subnet.public_subnet_1[0].id,
+    length(data.aws_subnet.existing_public_subnet_2.id) > 0 ? data.aws_subnet.existing_public_subnet_2.id : aws_subnet.public_subnet_2[0].id
   ]
 }
