@@ -26,7 +26,7 @@ data "aws_security_group" "rds_sg" {
   vpc_id = data.aws_vpc.main1.id
 }
 
-# If the security group doesn't exist, create it
+# Create the security group if it doesn't exist
 resource "aws_security_group" "rds_sg" {
   count       = length(data.aws_security_group.rds_sg.id) == 0 ? 1 : 0
   name        = "rds-sg"
@@ -57,7 +57,7 @@ data "aws_db_subnet_group" "default" {
   name = "default-subnet-group"
 }
 
-# If the DB subnet group doesn't exist, create it
+# Create the DB subnet group if it doesn't exist
 resource "aws_db_subnet_group" "default" {
   count       = length(data.aws_db_subnet_group.default.id) == 0 ? 1 : 0
   name        = "default-subnet-group"
@@ -76,9 +76,9 @@ data "aws_db_instance" "app_db_instance" {
   db_instance_identifier = "app-db-instance"
 }
 
-# If the RDS instance doesn't exist, create it
+# Create the RDS instance if it doesn't exist
 resource "aws_db_instance" "app_db_instance" {
-  count = length(data.aws_db_instance.app_db_instance.ids) == 0 ? 1 : 0
+  count = length(data.aws_db_instance.app_db_instance.id) == 0 ? 1 : 0
   allocated_storage    = 20
   engine               = "postgres"
   engine_version       = "13.4"
@@ -88,8 +88,8 @@ resource "aws_db_instance" "app_db_instance" {
   publicly_accessible  = false  # Ensure the RDS instance is not publicly accessible
   multi_az             = false
   storage_type         = "gp2"
-  db_subnet_group_name = aws_db_subnet_group.default.name
-  vpc_security_group_ids = [aws_security_group.rds_sg.id]
+  db_subnet_group_name = aws_db_subnet_group.default[0].name
+  vpc_security_group_ids = [aws_security_group.rds_sg[0].id]
 
   tags = {
     Name = "app-db-instance"
