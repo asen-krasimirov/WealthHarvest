@@ -16,6 +16,10 @@ variable "vpc_id" {
   default = "vpc-073a7a8647eec235c"
 }
 
+variable "internet_gateway_id" {
+  default = "igw-017726cbfae417015"
+}
+
 variable "app_db_username" {
   description = "The username for the application database."
   default     = "app_user"

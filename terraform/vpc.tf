@@ -5,6 +5,11 @@ data "aws_vpc" "main1" {
   id = var.vpc_id  # Replace with your existing VPC ID
 }
 
+# Reference the existing Internet Gateway by its ID
+data "aws_internet_gateway" "existing_gw" {
+  internet_gateway_id = var.internet_gateway_id  # Use the existing IGW ID
+}
+
 # Create Public Subnet
 resource "aws_subnet" "public_subnet" {
   vpc_id                  = data.aws_vpc.main1.id  # Reference the existing VPC
@@ -29,11 +34,8 @@ resource "aws_subnet" "private_subnet" {
   }
 }
 
-# Create Internet Gateway (for public subnet)
-resource "aws_internet_gateway" "gw" {
-  vpc_id = data.aws_vpc.main1.id  # Reference the existing VPC
-
-  tags = {
-    Name = "main-vpc-gw"
-  }
+# Attach the existing Internet Gateway to the VPC
+resource "aws_vpc_gateway_attachment" "gw_attachment" {
+  vpc_id             = data.aws_vpc.main1.id  # Reference the existing VPC
+  internet_gateway_id = data.aws_internet_gateway.existing_gw.id  # Use the existing Internet Gateway
 }
