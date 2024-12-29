@@ -15,6 +15,14 @@ data "aws_subnet" "private_subnet_2" {
   vpc_id = var.vpc_id
 }
 
+data "aws_subnet" "private_subnet_3" {
+  filter {
+    name   = "cidrBlock"
+    values = ["10.0.16.0/24"]
+  }
+  vpc_id = var.vpc_id
+}
+
 # Check if the DB Subnet Group already exists
 data "aws_db_subnet_group" "existing" {
   name = "default-subnet-group"
@@ -26,7 +34,8 @@ resource "aws_db_subnet_group" "default" {
   name         = "default-subnet-group"
   subnet_ids   = [
     data.aws_subnet.private_subnet_1.id,
-    data.aws_subnet.private_subnet_2.id
+    data.aws_subnet.private_subnet_2.id,
+    data.aws_subnet.private_subnet_3.id
   ]
 
   tags = {
@@ -73,13 +82,13 @@ resource "aws_security_group" "rds_sg" {
 resource "aws_db_instance" "app_db_instance" {
   allocated_storage    = 20
   engine               = "postgres"
-  engine_version       = "11.22"
-  instance_class       = "db.t3.micro"
+  engine_version       = "16.1"
+  instance_class       = "db.t3.small"
   username             = var.app_db_username
   password             = var.app_db_password
   publicly_accessible  = false  # Ensure the RDS instance is not publicly accessible
   multi_az             = false
-  storage_type         = "gp2"
+  storage_type         = "gp3"
   db_subnet_group_name = length(data.aws_db_subnet_group.existing.id) > 0 ? data.aws_db_subnet_group.existing.name : aws_db_subnet_group.default[0].name
   vpc_security_group_ids = aws_security_group.rds_sg.*.id
 
