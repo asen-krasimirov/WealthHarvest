@@ -17,20 +17,20 @@ data "aws_subnet" "private_subnet_2" {
 
 # Check if the DB Subnet Group already exists
 data "aws_db_subnet_group" "existing" {
-  name = "db-subnet-group"
+  name = "default-subnet-group"
 }
 
 # Create DB Subnet Group for RDS if it does not exist
 resource "aws_db_subnet_group" "default" {
   count        = length(data.aws_db_subnet_group.existing.id) == 0 ? 1 : 0
-  name         = "db-subnet-group"
+  name         = "default-subnet-group"
   subnet_ids   = [
     data.aws_subnet.private_subnet_1.id,
     data.aws_subnet.private_subnet_2.id
   ]
 
   tags = {
-    Name = "db-subnet-group"
+    Name = "default-subnet-group"
   }
 }
 
