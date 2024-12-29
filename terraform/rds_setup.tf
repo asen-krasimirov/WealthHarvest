@@ -28,7 +28,7 @@ data "aws_security_group" "rds_sg" {
 
 # If the security group doesn't exist, create it
 resource "aws_security_group" "rds_sg" {
-  count       = length(data.aws_security_group.rds_sg.ids) == 0 ? 1 : 0
+  count       = length(data.aws_security_group.rds_sg.id) == 0 ? 1 : 0
   name        = "rds-sg"
   description = "Security Group for RDS instance"
   vpc_id      = data.aws_vpc.main1.id
@@ -59,7 +59,7 @@ data "aws_db_subnet_group" "default" {
 
 # If the DB subnet group doesn't exist, create it
 resource "aws_db_subnet_group" "default" {
-  count       = length(data.aws_db_subnet_group.default.ids) == 0 ? 1 : 0
+  count       = length(data.aws_db_subnet_group.default.id) == 0 ? 1 : 0
   name        = "default-subnet-group"
   subnet_ids  = [
     data.aws_subnet.private_subnet_1.id,
