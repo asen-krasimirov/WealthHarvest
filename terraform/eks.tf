@@ -59,4 +59,35 @@ resource "aws_launch_configuration" "eks_workers" {
 
   image_id = "ami-0c24db5b5f274e9a0"  # Example Amazon Linux AMI for EKS worker nodes
 
+  user_data = <<-EOT
+                #!/bin/bash
+                set -o xtrace
+                /etc/eks/bootstrap.sh ${aws_eks_cluster.eks_cluster.name}
+                EOT
+}
 
+# IAM instance profile for worker nodes
+resource "aws_iam_instance_profile" "worker_nodes" {
+  name = "eks-worker-nodes-profile"
+  role = data.aws_iam_role.eks_role.name
+}
+
+# Autoscaling Group for Worker Nodes
+resource "aws_autoscaling_group" "eks_worker_group" {
+  launch_configuration = aws_launch_configuration.eks_workers.id
+  min_size             = 1
+  max_size             = 3
+  desired_capacity     = 2
+  vpc_zone_identifier  = [
+    aws_subnet.public_subnet_1.id,
+    aws_subnet.public_subnet_2.id
+  ]
+
+  tags = [
+    {
+      key                 = "Name"
+      value               = "eks-worker-node"
+      propagate_at_launch = true
+    }
+  ]
+}
