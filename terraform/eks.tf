@@ -99,12 +99,13 @@ resource "aws_launch_template" "eks_workers" {
   }
 
   # Specify the EKS cluster name explicitly
-  user_data = <<-EOT
+  user_data = base64encode(<<-EOT
                 #!/bin/bash
                 set -o xtrace
                 /etc/eks/bootstrap.sh my-eks-cluster
                 EOT
-  
+  ) 
+
   image_id = data.aws_ami.eks_amazon_linux_2.id
 
   lifecycle {
