@@ -81,7 +81,7 @@ jobs:
 
       - name: Deploy Frontend to S3
         run: |
-          aws s3 sync repos/frontend s3://my-frontend-bucket --acl public-read
+          aws s3 sync repos/frontend s3://frontendbucketwealthharvest --acl public-read
 
   terraform:
     if: contains(github.event.head_commit.message, '[terraform]')
