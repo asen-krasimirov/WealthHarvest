@@ -75,7 +75,7 @@ resource "aws_db_instance" "app_db_instance" {
   multi_az             = false
   storage_type         = "gp2"
   db_subnet_group_name = aws_db_subnet_group.default.name
-  vpc_security_group_ids = [aws_security_group.rds_sg[count.index].id]
+  vpc_security_group_ids = aws_security_group.rds_sg.*.id
 
   tags = {
     Name = "app-db-instance"
