@@ -1,3 +1,22 @@
+# Check if the DB Subnet Group already exists
+data "aws_db_subnet_group" "existing" {
+  name = "default-subnet-group"
+}
+
+# Create DB Subnet Group for RDS only if it doesn't exist
+resource "aws_db_subnet_group" "default" {
+  count        = length(data.aws_db_subnet_group.existing.id) == 0 ? 1 : 0
+  name         = "default-subnet-group"
+  subnet_ids   = [
+    data.aws_subnet.private_subnet_1.id,
+    data.aws_subnet.private_subnet_2.id
+  ]
+
+  tags = {
+    Name = "default-subnet-group"
+  }
+}
+
 # Fetch existing subnets by their CIDR blocks
 data "aws_subnet" "private_subnet_1" {
   filter {
@@ -50,19 +69,6 @@ resource "aws_security_group" "rds_sg" {
   }
 }
 
-# Create DB Subnet Group for RDS (no data lookup, directly create it)
-resource "aws_db_subnet_group" "default" {
-  name        = "default-subnet-group"
-  subnet_ids  = [
-    data.aws_subnet.private_subnet_1.id,
-    data.aws_subnet.private_subnet_2.id
-  ]
-
-  tags = {
-    Name = "default-subnet-group"
-  }
-}
-
 # Create RDS Instance unconditionally
 resource "aws_db_instance" "app_db_instance" {
   allocated_storage    = 20
@@ -74,7 +80,7 @@ resource "aws_db_instance" "app_db_instance" {
   publicly_accessible  = false  # Ensure the RDS instance is not publicly accessible
   multi_az             = false
   storage_type         = "gp2"
-  db_subnet_group_name = aws_db_subnet_group.default.name
+  db_subnet_group_name = length(data.aws_db_subnet_group.existing.id) > 0 ? data.aws_db_subnet_group.existing.name : aws_db_subnet_group.default[0].name
   vpc_security_group_ids = aws_security_group.rds_sg.*.id
 
   tags = {
