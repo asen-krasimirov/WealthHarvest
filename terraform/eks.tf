@@ -78,12 +78,4 @@ resource "aws_autoscaling_group" "eks_worker_group" {
     aws_subnet.public_subnet_1.id,
     aws_subnet.public_subnet_2.id
   ]
-
-  tags = [
-    {
-      key                 = "Name"
-      value               = "eks-worker-node"
-      propagate_at_launch = true
-    }
-  ]
 }
