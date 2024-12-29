@@ -1,9 +1,5 @@
 # eks.tf
 
-variable "vpc_id" {
-  description = "The ID of the VPC"
-}
-
 # Fetch the existing IAM role by its name
 data "aws_iam_role" "eks_role" {
   name = var.aws_iam_role
