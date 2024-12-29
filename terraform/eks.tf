@@ -51,7 +51,7 @@ resource "aws_launch_configuration" "eks_workers" {
   instance_type = "t3.medium"
 
   # Attach the existing IAM role to the worker nodes
-  iam_instance_profile = aws_iam_instance_profile.worker_nodes.name
+  iam_instance_profile = aws_iam_instance_profile.worker_nodes[0].name
 
   image_id = "ami-0c24db5b5f274e9a0"  # Example Amazon Linux AMI for EKS worker nodes
 
