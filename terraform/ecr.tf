@@ -16,7 +16,7 @@ resource "aws_ecr_repository" "auth_repo" {
   image_tag_mutability  = "MUTABLE"
   
   tags = {
-    Name = "auth-repo"
+    Name = "auth"
   }
 }
 
