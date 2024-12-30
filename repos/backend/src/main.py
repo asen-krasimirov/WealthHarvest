@@ -6,9 +6,10 @@ app = FastAPI()
 # Allow requests from your S3 bucket's domain
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://frontendbucketwealthharvest.s3.eu-central-1.amazonaws.com/index.html"],
-    allow_methods=["GET"],
+    allow_origins=["https://frontendbucketwealthharvest.s3.eu-central-1.amazonaws.com"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
+    allow_credentials=True,
 )
 
 @app.get("/data")
