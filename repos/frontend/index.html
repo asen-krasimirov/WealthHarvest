@@ -1,1 +1,50 @@
-ne znam
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FastAPI JSON Visualizer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 10px;
+      border: 1px solid #ddd;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>FastAPI JSON Visualizer</h1>
+  <button id="fetchData">Fetch Data from FastAPI</button>
+  <h2>Data:</h2>
+  <pre id="jsonOutput">Click "Fetch Data from FastAPI" to load data.</pre>
+
+  <script>
+    // Replace this with the actual URL of your FastAPI backend
+    const apiUrl = "https://your-fastapi-backend-domain/data";
+
+    document.getElementById("fetchData").addEventListener("click", () => {
+      fetch(apiUrl)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Failed to fetch data from FastAPI.");
+          }
+          return response.json();
+        })
+        .then(data => {
+          document.getElementById("jsonOutput").textContent = JSON.stringify(data, null, 2);
+        })
+        .catch(error => {
+          document.getElementById("jsonOutput").textContent = `Error: ${error.message}`;
+        });
+    });
+  </script>
+</body>
+</html>
