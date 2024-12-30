@@ -12,10 +12,10 @@ spec:
       labels:
         app: backend
     spec:
-      serviceAccountName: default
+      nodeSelector:
+        nodegroup: custom-node-group
       containers:
         - name: backend
           image: 761018871291.dkr.ecr.eu-central-1.amazonaws.com/backend:latest
           ports:
             - containerPort: 8000
-
