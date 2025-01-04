@@ -1,0 +1,112 @@
+name: Main Workflow
+
+on: [push]
+
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install flake8
+
+    - name: Run flake8
+      run: |
+        flake8 ./repos/
+
+  editorconfig-checker:
+    runs-on: ubuntu-latest
+
+    needs: linter
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Checkout editorconfig-checker
+      uses: editorconfig-checker/action-editorconfig-checker@main
+
+    - name: Run editorconfig-checker
+      run: editorconfig-checker
+
+  markdown-checker:
+    runs-on: ubuntu-latest
+
+    needs: linter
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+
+    - name: Install cli-markdown
+      run: npm install -g cli-markdown
+
+    - name: Run cli-markdown on all .md files
+      run: npx cli-markdown *.md
+
+  sonarqube:
+    runs-on: ubuntu-latest
+
+    needs: [linter, editorconfig-checker]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v4.1.0
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+      with:
+        args: >
+          -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
+          -Dsonar.organization=${{ vars.SONAR_ORGANIZATION_KEY }}
+
+  gitleaks:
+    runs-on: ubuntu-latest
+
+    needs: linter
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITLEAKS_TOKEN }}
+
+  database-migrate-check:
+    if: false               # diable job: Due to Flyway problems.
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install Flyway
+      run: |
+        wget https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/11.1.0/flyway-commandline-11.1.0-linux-x64.tar.gz
+        tar -xvf flyway-commandline-11.1.0-linux-x64.tar.gz
+        sudo mv flyway-11.1.0 /usr/local/flyway
+        export PATH=$PATH:/usr/local/flyway
+
+    - name: Run Flyway migration check
+      run: |
+        /usr/local/flyway/flyway -url=jdbc:mysql://localhost:3306/your_db -user=your_user -password=your_password -locations=filesystem:sql check
