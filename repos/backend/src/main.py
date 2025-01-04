@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-origins=["https://frontendbucketwealthharvest.s3.eu-central-1.amazonaws.com"]
+origins = ["https://frontendbucketwealthharvest.s3.eu-central-1.amazonaws.com"]
 
 # Allow requests from your S3 bucket's domain
 app.add_middleware(
