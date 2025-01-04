@@ -1,142 +1,71 @@
-# Fetch the existing IAM role by its name
-data "aws_iam_role" "eks_role" {
-  name = var.aws_iam_role
+# Provider Configuration
+provider "aws" {
+  region = "us-west-2" # Adjust region as needed
 }
 
-# Check for existing EKS Cluster
+# Data source to fetch existing EKS Cluster
 data "aws_eks_cluster" "existing_cluster" {
-  name = "my-eks-cluster"
+  name = "my-existing-cluster" # Your existing EKS cluster name
 }
 
-# Check for existing Public Subnet 1
-data "aws_subnet" "existing_public_subnet_1" {
-  filter {
-    name   = "cidr-block"
-    values = ["10.0.10.0/24"]
-  }
-  filter {
-    name   = "vpc-id"
-    values = [var.vpc_id]
-  }
+# Data source to get the existing EKS cluster's kubeconfig
+data "aws_eks_cluster_auth" "existing_cluster_auth" {
+  name = data.aws_eks_cluster.existing_cluster.name
 }
 
-# Check for existing Public Subnet 2
-data "aws_subnet" "existing_public_subnet_2" {
-  filter {
-    name   = "cidr-block"
-    values = ["10.0.11.0/24"]
-  }
-  filter {
-    name   = "vpc-id"
-    values = [var.vpc_id]
-  }
-}
+# Create a new IAM Role for the Node Group (if it doesn't exist)
+resource "aws_iam_role" "node_group_role" {
+  name = "eks-node-group-role"
 
-# Create Public Subnet 1 only if it doesn't already exist
-resource "aws_subnet" "public_subnet_1" {
-  count                   = length(data.aws_subnet.existing_public_subnet_1.id) == 0 ? 1 : 0
-  vpc_id                  = var.vpc_id
-  cidr_block              = "10.0.10.0/24"
-  availability_zone       = "eu-central-1a"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name                  = "public-subnet-1"
-    "kubernetes.io/role/elb" = "1"
-  }
-}
-
-# Create Public Subnet 2 only if it doesn't already exist
-resource "aws_subnet" "public_subnet_2" {
-  count                   = length(data.aws_subnet.existing_public_subnet_2.id) == 0 ? 1 : 0
-  vpc_id                  = var.vpc_id
-  cidr_block              = "10.0.11.0/24"
-  availability_zone       = "eu-central-1b"
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name                  = "public-subnet-2"
-    "kubernetes.io/role/elb" = "1"
-  }
-}
-
-# EKS Cluster (create only if it doesn't already exist)
-resource "aws_eks_cluster" "eks_cluster" {
-  count    = length(data.aws_eks_cluster.existing_cluster.id) == 0 ? 1 : 0
-  name     = "my-eks-cluster"
-  role_arn = data.aws_iam_role.eks_role.arn
-
-  vpc_config {
-    subnet_ids = [
-      length(data.aws_subnet.existing_public_subnet_1.id) > 0 ? data.aws_subnet.existing_public_subnet_1.id : aws_subnet.public_subnet_1[0].id,
-      length(data.aws_subnet.existing_public_subnet_2.id) > 0 ? data.aws_subnet.existing_public_subnet_2.id : aws_subnet.public_subnet_2[0].id
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action    = "sts:AssumeRole"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+        Effect   = "Allow"
+        Sid      = ""
+      }
     ]
-  }
-
-  tags = {
-    Name = "my-eks-cluster"
-  }
+  })
 }
 
-data "aws_ami" "eks_amazon_linux_2" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["amzn2-ami-*-x86_64-gp2"]
-  }
+# Attach the necessary IAM policies to the Node Group role
+resource "aws_iam_role_policy_attachment" "eks_node_group_policy" {
+  role       = aws_iam_role.node_group_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
 }
 
-# Worker Node Group (optional, if self-managed nodes are used)
-resource "aws_launch_template" "eks_workers" {
-  name_prefix   = "eks-worker-config"
-  instance_type = "t3.nano"
-
-  # Ensure IAM instance profile reference is properly resolved
-  iam_instance_profile {
-    name = length(data.aws_iam_instance_profile.existing_worker_nodes.id) > 0 ? data.aws_iam_instance_profile.existing_worker_nodes.name : aws_iam_instance_profile.worker_nodes[0].name
-  }
-
-  # Specify the EKS cluster name explicitly
-  user_data = base64encode(<<-EOT
-                #!/bin/bash
-                set -o xtrace
-                /etc/eks/bootstrap.sh my-eks-cluster
-                EOT
-  )
-
-  image_id = data.aws_ami.eks_amazon_linux_2.id
-
-  lifecycle {
-    create_before_destroy = true
-  }
+resource "aws_iam_role_policy_attachment" "ec2_container_registry_readonly" {
+  role       = aws_iam_role.node_group_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
-# Check if the IAM instance profile already exists
-data "aws_iam_instance_profile" "existing_worker_nodes" {
-  name = "eks-worker-nodes-profile"
+resource "aws_iam_role_policy_attachment" "vpc_cni_policy" {
+  role       = aws_iam_role.node_group_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
 }
 
-# Create the IAM instance profile if it doesn't exist
-resource "aws_iam_instance_profile" "worker_nodes" {
-  count = length(data.aws_iam_instance_profile.existing_worker_nodes.id) == 0 ? 1 : 0
-  name  = "eks-worker-nodes-profile"
-  role  = data.aws_iam_role.eks_role.name
-}
+# Create a Managed Node Group for EKS
+resource "aws_eks_node_group" "my_node_group" {
+  cluster_name    = data.aws_eks_cluster.existing_cluster.name
+  node_group_name = "my-node-group"
+  node_role       = aws_iam_role.node_group_role.arn
+  subnet_ids      = data.aws_eks_cluster.existing_cluster.subnet_ids
 
-# Update the Autoscaling Group to use the launch template
-resource "aws_autoscaling_group" "eks_worker_group" {
-  launch_template {
-    id      = aws_launch_template.eks_workers.id
-    version = "$Latest"
+  scaling_config {
+    desired_size = 2
+    min_size     = 1
+    max_size     = 3
   }
-  min_size             = 1
-  max_size             = 3
-  desired_capacity     = 2
-  vpc_zone_identifier  = [
-    length(data.aws_subnet.existing_public_subnet_1.id) > 0 ? data.aws_subnet.existing_public_subnet_1.id : aws_subnet.public_subnet_1[0].id,
-    length(data.aws_subnet.existing_public_subnet_2.id) > 0 ? data.aws_subnet.existing_public_subnet_2.id : aws_subnet.public_subnet_2[0].id
+
+  instance_types = ["t3.medium"]  # Adjust instance type as needed
+
+  depends_on = [
+    aws_iam_role_policy_attachment.eks_node_group_policy,
+    aws_iam_role_policy_attachment.ec2_container_registry_readonly,
+    aws_iam_role_policy_attachment.vpc_cni_policy
   ]
-  depends_on = [aws_launch_template.eks_workers]
 }
