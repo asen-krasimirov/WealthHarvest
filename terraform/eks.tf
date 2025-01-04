@@ -91,7 +91,7 @@ data "aws_ami" "eks_amazon_linux_2" {
 # Worker Node Group (optional, if self-managed nodes are used)
 resource "aws_launch_template" "eks_workers" {
   name_prefix   = "eks-worker-config"
-  instance_type = "t3.medium"
+  instance_type = "t3.nano"
 
   # Ensure IAM instance profile reference is properly resolved
   iam_instance_profile {
