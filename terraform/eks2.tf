@@ -1,7 +1,7 @@
 # Data source to fetch existing EKS Cluster
-data "aws_eks_cluster" "existing_cluster" {
-  name = "my-eks-cluster"
-}
+#data "aws_eks_cluster" "existing_cluster" {
+#  name = "my-eks-cluster"
+#}
 
 # Data source to get the existing EKS cluster's kubeconfig
 data "aws_eks_cluster_auth" "existing_cluster_auth" {
