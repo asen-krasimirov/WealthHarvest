@@ -28,7 +28,7 @@ jobs:
       - name: Install app dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r src/requirements.txt
+          pip install -r repos/auth/requirements.txt
 
       - name: Run auth snyk
         run: npx snyk test --file="./repos/auth/requirements.txt"
