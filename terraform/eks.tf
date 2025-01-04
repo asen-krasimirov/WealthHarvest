@@ -104,7 +104,7 @@ resource "aws_launch_template" "eks_workers" {
                 set -o xtrace
                 /etc/eks/bootstrap.sh my-eks-cluster
                 EOT
-  ) 
+  )
 
   image_id = data.aws_ami.eks_amazon_linux_2.id
 

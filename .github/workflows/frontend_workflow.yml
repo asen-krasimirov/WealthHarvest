@@ -5,16 +5,16 @@ on:
     branches:
       - main
     paths:
-     - 'repos/frontend/**'
+      - 'repos/frontend/**'
   pull_request:
     types: [opened, reopened]
 
 jobs:
   deploy:
     if: contains(github.event.head_commit.message, '[frontend]')
-    
+
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3

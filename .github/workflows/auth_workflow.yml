@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-     - 'repos/auth/**'
+      - 'repos/auth/**'
   pull_request:
     types: [opened, reopened]
 
@@ -62,11 +62,11 @@ jobs:
 
   deploy:
     if: contains(github.event.head_commit.message, '[auth]')
-    
+
     runs-on: ubuntu-latest
 
     needs: unittests
-    
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3

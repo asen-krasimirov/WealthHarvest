@@ -14,7 +14,7 @@ resource "aws_ecr_repository" "auth_repo" {
   count                 = length(data.aws_ecr_repository.auth_repo.id) == 0 ? 1 : 0
   name                  = "auth"
   image_tag_mutability  = "MUTABLE"
-  
+
   tags = {
     Name = "auth"
   }

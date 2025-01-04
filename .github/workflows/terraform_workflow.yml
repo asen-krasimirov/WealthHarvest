@@ -5,16 +5,16 @@ on:
     branches:
       - main
     paths:
-     - 'terraform/**'
+      - 'terraform/**'
   pull_request:
     types: [opened, reopened]
 
 jobs:
   deloy:
     if: contains(github.event.head_commit.message, '[terraform]')
-    
+
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -25,7 +25,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-      
+
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
         with:
