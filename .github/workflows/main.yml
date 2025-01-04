@@ -1,115 +1,115 @@
-name: Monorepo CI/CD Pipeline
+# name: Monorepo CI/CD Pipeline
 
-on:
-  push:
-    branches:
-      - main
-    #paths:
-    #  - 'repos/backend/**'
-    #  - 'repos/auth/**'
-    #  - 'repos/frontend/**'
-    #  - 'terraform/**'
+# on:
+#   push:
+#     branches:
+#       - main
+#     #paths:
+#     #  - 'repos/backend/**'
+#     #  - 'repos/auth/**'
+#     #  - 'repos/frontend/**'
+#     #  - 'terraform/**'
 
-jobs:
-  backend:
-    if: contains(github.event.head_commit.message, '[backend]')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+# jobs:
+#   backend:
+#     if: contains(github.event.head_commit.message, '[backend]')
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v3
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Build and Push Backend Docker Image
-        run: |
-          cd repos/backend
-          docker build -t backend:latest .
-          docker tag backend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/backend:latest
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/backend:latest
+#       - name: Build and Push Backend Docker Image
+#         run: |
+#           cd repos/backend
+#           docker build -t backend:latest .
+#           docker tag backend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/backend:latest
+#           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+#           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/backend:latest
 
-      - name: Deploy Backend to EKS
-        run: |
-          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name my-eks-cluster
-          kubectl apply -f ./k8s/backend-deployment.yml
+#       - name: Deploy Backend to EKS
+#         run: |
+#           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name my-eks-cluster
+#           kubectl apply -f ./k8s/backend-deployment.yml
 
-  auth:
-    if: contains(github.event.head_commit.message, '[auth]')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+#   auth:
+#     if: contains(github.event.head_commit.message, '[auth]')
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v3
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Build and Push Auth Docker Image
-        run: |
-          cd repos/auth
-          docker build -t auth:latest .
-          docker tag auth:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/auth:latest
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/auth:latest
+#       - name: Build and Push Auth Docker Image
+#         run: |
+#           cd repos/auth
+#           docker build -t auth:latest .
+#           docker tag auth:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/auth:latest
+#           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+#           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/auth:latest
 
-      - name: Deploy Auth to EKS
-        run: |
-          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name my-eks-cluster
-          kubectl apply -f ./k8s/auth-deployment.yml
+#       - name: Deploy Auth to EKS
+#         run: |
+#           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name my-eks-cluster
+#           kubectl apply -f ./k8s/auth-deployment.yml
 
-  frontend:
-    if: contains(github.event.head_commit.message, '[frontend]')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+#   frontend:
+#     if: contains(github.event.head_commit.message, '[frontend]')
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v3
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Deploy Frontend to S3
-        run: |
-          aws s3 sync repos/frontend s3://frontendbucketwealthharvest # --acl public-read
+#       - name: Deploy Frontend to S3
+#         run: |
+#           aws s3 sync repos/frontend s3://frontendbucketwealthharvest # --acl public-read
 
-  terraform:
-    if: contains(github.event.head_commit.message, '[terraform]')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+#   terraform:
+#     if: contains(github.event.head_commit.message, '[terraform]')
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v3
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ secrets.AWS_REGION }}
       
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.5.7
+#       - name: Set up Terraform
+#         uses: hashicorp/setup-terraform@v2
+#         with:
+#           terraform_version: 1.5.7
 
-      - name: Initialize Terraform
-        working-directory: terraform
-        run: terraform init
+#       - name: Initialize Terraform
+#         working-directory: terraform
+#         run: terraform init
 
-      - name: Plan Terraform
-        working-directory: terraform
-        run: terraform plan
+#       - name: Plan Terraform
+#         working-directory: terraform
+#         run: terraform plan
 
-      - name: Apply Terraform
-        working-directory: terraform
-        run: terraform apply -auto-approve
+#       - name: Apply Terraform
+#         working-directory: terraform
+#         run: terraform apply -auto-approve
