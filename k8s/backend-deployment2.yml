@@ -1,0 +1,56 @@
+# fastapi-deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  labels:
+    app: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: 761018871291.dkr.ecr.eu-central-1.amazonaws.com/backend:latest
+          ports:
+            - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 80            # External port exposed by LoadBalancer
+      targetPort: 8000     # Port your FastAPI app is listening on
+  type: LoadBalancer       # This will create an AWS LoadBalancer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-ingress
+  annotations:
+    kubernetes.io/ingress.class: "alb"  # AWS ALB Ingress Controller
+    # Uncomment and add the following line if you are using HTTPS with ALB
+    # alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-west-2:123456789012:certificate/your-certificate-id
+spec:
+  rules:
+    - host: wealthharvest.com  # Your custom domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fastapi-service
+                port:
+                  number: 80
