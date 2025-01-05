@@ -1,7 +1,7 @@
 # Data source to fetch existing EKS Cluster
-data "aws_eks_cluster" "existing_cluster" {
-  name = "my-eks-cluster"
-}
+#data "aws_eks_cluster" "existing_cluster" {
+#  name = "my-eks-cluster"
+#}
 
 # Data source to get the existing EKS cluster's kubeconfig
 data "aws_eks_cluster_auth" "existing_cluster_auth" {
@@ -21,7 +21,7 @@ resource "aws_iam_role" "node_group_role" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action    = "sts:AssumeRole"
+        Action    = ["sts:AssumeRole", "sts:TagSession"]
         Principal = {
           Service = "ec2.amazonaws.com"
         }
