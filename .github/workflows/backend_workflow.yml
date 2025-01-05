@@ -88,5 +88,5 @@ jobs:
 
       - name: Deploy Backend to EKS
         run: |
-          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name my-eks-cluster --validate=false
-          kubectl apply -f ./k8s/backend-deployment.yml
+          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name my-eks-cluster
+          kubectl apply -f ./k8s/backend-deployment.yml --validate=false
