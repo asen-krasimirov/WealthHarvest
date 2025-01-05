@@ -1,11 +1,16 @@
 # Data source to fetch existing EKS Cluster
-#data "aws_eks_cluster" "existing_cluster" {
-#  name = "my-eks-cluster"
-#}
+data "aws_eks_cluster" "existing_cluster" {
+  name = "my-eks-cluster"
+}
 
 # Data source to get the existing EKS cluster's kubeconfig
 data "aws_eks_cluster_auth" "existing_cluster_auth" {
   name = data.aws_eks_cluster.existing_cluster.name
+}
+
+# Data source to get subnets
+data "aws_subnet_ids" "selected" {
+  vpc_id = data.aws_eks_cluster.existing_cluster.vpc_id
 }
 
 # Create a new IAM Role for the Node Group (if it doesn't exist)
@@ -48,7 +53,7 @@ resource "aws_eks_node_group" "my_node_group" {
   cluster_name    = data.aws_eks_cluster.existing_cluster.name
   node_group_name = "my-node-group"
   node_role       = aws_iam_role.node_group_role.arn
-  subnet_ids      = data.aws_eks_cluster.existing_cluster.subnet_ids
+  subnet_ids      = data.aws_subnet_ids.selected.ids
 
   scaling_config {
     desired_size = 2
