@@ -5,7 +5,7 @@ app = FastAPI()
 
 origins = ["https://frontendbucketwealthharvest.s3.eu-central-1.amazonaws.com"]
 
-# Allow requests from your AWS S3 bucket's domain
+# Allow requests from your S3 bucket's domain
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
