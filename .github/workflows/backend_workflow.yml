@@ -80,19 +80,25 @@ jobs:
 
       - name: Build and Push Backend Docker Image
         run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region ${{ secrets.AWS_REGION }}
           cd repos/backend
           docker build -t backend:latest .
           docker tag backend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/backend:latest
           aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/backend:latest
 
-      - name: Configure AWS CLI with aws configure
+      # - name: Configure AWS CLI with aws configure
+      #   run: |
+      #     aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws configure set region ${{ secrets.AWS_REGION }}
+
+      - name: Deploy Backend to EKS
         run: |
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set region ${{ secrets.AWS_REGION }}
-
-      - name: Deploy Backend to EKS
-        run: |
           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name my-eks-cluster
           kubectl apply -f ./k8s/backend-deployment.yml
