@@ -1,7 +1,6 @@
 name: Main Workflow
 
-# on: [push]          # temporary disabled
-on: [pull_request]    # to be removed
+on: [push, pull_request]          
 
 jobs:
   linter:
