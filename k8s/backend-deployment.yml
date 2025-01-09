@@ -16,6 +16,5 @@ spec:
       - name: backend
         image: 761018871291.dkr.ecr.eu-central-1.amazonaws.com/backend:latest
         imagePullPolicy: Always
-        # ports:
-        # - containerPort: 8000
-
+        ports:
+        - containerPort: 8000
