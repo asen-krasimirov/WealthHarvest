@@ -25,7 +25,7 @@ All components are deployed on **AWS** using:
 - **S3** as a bucket for the `frontend`
 
 > [!Note]
-> Terraform is used to configure all the **AWS** resources ([`terraform`](./terraform))
+> Terraform is used to configure all the **AWS** resources ([`terraform`](./terraform)).
 
 `backend` and `auth`'s images are deployed on **ECR** (serving as a private Docker repository).
 
@@ -74,5 +74,5 @@ They consist of component specific jobs like checking for dependency errors and 
 - initializes, plans and applies configuration for `terraform`
 
 > [!Important]
-> In order for the deployment jobs to run you need to add `[backend]`, `[auth]`, `[frontend]`, or `[tarraform]` tag in the commit message of the given change.
+> In order for the deployment jobs to run you need to add `[backend]`, `[auth]`, `[frontend]`, or `[tarraform]` tag in the commit message of the given change. </br>
 > This is made with governence purposes for the **AWS** resouces.
