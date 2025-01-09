@@ -4,17 +4,12 @@ This project is a final project for the FMI Course "Modern DevOps Practices" (MD
 
 ### Code Organization
 
-All the code of the app is centralized in this repo (as a monorepo, under [`repos`](./repos)). At this time there are 3 main modules in this project: 
-- [`backend`](./repos/backend) -> Containing the business logic of the application (as of now it consists of an FastAPI api).
-- [`auth`](./repos/auth) -> This module is responsible for handling of the authentication logic (made separate for easier replacement in the future).
-- [`frontend`](./repos/frontend) -> A module that handles the client facing logic of the application.
+All the code of the app is centralized in this repo (as a monorepo, under [`repos`](./repos)). At this time there are 3 main modules in this project:
 <pre>
 - <a href="https://github.com/asen-krasimirov/WealthHarvest/tree/main/repos/backend">backend</a>  -> Containing the business logic of the application (as of now it consists of an FastAPI api).
 - <a href="https://github.com/asen-krasimirov/WealthHarvest/tree/main/repos/auth">auth</a>     -> This module is responsible for handling of the authentication logic (made separate for easier replacement in the future).
 - <a href="https://github.com/asen-krasimirov/WealthHarvest/tree/main/repos/frontend">frontend</a> -> A module that handles the client facing logic of the application.
-  
 </pre>
-Flyway is used to manage migrations for the database. (TBA)
 
 ### Architecture, Deployment and Infrastructure
 
