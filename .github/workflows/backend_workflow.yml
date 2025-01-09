@@ -92,7 +92,7 @@ jobs:
           aws eks list-clusters --region eu-central-1
           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name my-eks-cluster
           cat ~/.kube/config
-      
+
       - name: Deploy Backend to EKS
         run: |
           aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name my-eks-cluster
