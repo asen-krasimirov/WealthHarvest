@@ -14,19 +14,20 @@ spec:
     spec:
       containers:
       - name: auth
-        image: AKIA3CMCCNX5R3Z765XN.dkr.ecr.eu-central-1.amazonaws.com/auth:latest
+        image: 761018871291.dkr.ecr.eu-central-1.amazonaws.com/auth:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 5000
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: auth-service
-spec:
-  selector:
-    app: auth
-  ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 5000
-  type: ClusterIP
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: auth-service
+# spec:
+#   selector:
+#     app: auth
+#   ports:
+#   - protocol: TCP
+#     port: 80
+#     targetPort: 5000
+#   type: ClusterIP
