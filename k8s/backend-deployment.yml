@@ -13,7 +13,7 @@ spec:
         app: backend
     spec:
       nodeSelector:
-        nodegroup: custom-node-group
+        nodegroup: my-eks-cluster
       containers:
         - name: backend
           image: 761018871291.dkr.ecr.eu-central-1.amazonaws.com/backend:latest
